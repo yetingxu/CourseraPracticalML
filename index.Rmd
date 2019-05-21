@@ -1,0 +1,40 @@
+---
+title: "Assignment_Machine Learning"
+output: html_document
+---
+
+##Summary
+First, load the data and find the near zero variation variables in the training set and exclude them, and futher exclude variables with a lot of NA values to make the final trainig dataset trainingsub. 
+
+Second,fit the training dataset to gbm model. I first tried random forest because it usually has high accuracy but it ran for over an hour so i decidied to use boosting with trees (gbm) instead, which took less time and also has high accuracy.
+
+The cross validation used is by default bootstrapping. 
+
+Third, using confusion matrix to see the accuracy and other error rates. The accuracy is pretty high at 97% based on the training dataset. The out of sample error is unknown since the acutal label is taken out from test dataset, but it should be close to but less than 97%. 
+
+Lastly, using the model to predict the classes of the test data to answer the quiz questions, which got 100% accurate for all the 20 observations in the test dataset. 
+
+```{r ,echo=TRUE}
+library(caret)
+training<-read.csv("/Users/xuy089/Desktop/pml-training.csv")
+testing<-read.csv("/Users/xuy089/Desktop/pml-testing.csv")
+trainingsub<-training[,-c(1:7)]
+testingsub<-testing[,-c(1:7)]
+nsv<-nearZeroVar(trainingsub,saveMetrics = TRUE)
+nsv<-row.names(subset(nsv,nsv[,4]=="FALSE"))
+trainingsub<-subset(trainingsub,select= nsv)
+trainingsub<-trainingsub[,c("classe","roll_belt","pitch_belt","yaw_belt","total_accel_belt","gyros_belt_x","gyros_belt_y","gyros_belt_z","accel_belt_x","accel_belt_y","accel_belt_z","magnet_belt_x","magnet_belt_y","magnet_belt_z","roll_arm","pitch_arm","yaw_arm","total_accel_arm","gyros_arm_x","gyros_arm_y","gyros_arm_z","accel_arm_x","accel_arm_y","accel_arm_z","magnet_arm_x","magnet_arm_y","magnet_arm_z","roll_dumbbell","pitch_dumbbell","yaw_dumbbell","total_accel_dumbbell","gyros_dumbbell_x","gyros_dumbbell_y","gyros_dumbbell_z","accel_dumbbell_x","accel_dumbbell_y","accel_dumbbell_z","magnet_dumbbell_x","magnet_dumbbell_y","magnet_dumbbell_z","roll_forearm","pitch_forearm","yaw_forearm","total_accel_forearm","gyros_forearm_x","gyros_forearm_y","gyros_forearm_z","accel_forearm_x","accel_forearm_y","accel_forearm_z","magnet_forearm_x","magnet_forearm_y","magnet_forearm_z")]
+
+testingsub<-testingsub[,c("roll_belt","pitch_belt","yaw_belt","total_accel_belt","gyros_belt_x","gyros_belt_y","gyros_belt_z","accel_belt_x","accel_belt_y","accel_belt_z","magnet_belt_x","magnet_belt_y","magnet_belt_z","roll_arm","pitch_arm","yaw_arm","total_accel_arm","gyros_arm_x","gyros_arm_y","gyros_arm_z","accel_arm_x","accel_arm_y","accel_arm_z","magnet_arm_x","magnet_arm_y","magnet_arm_z","roll_dumbbell","pitch_dumbbell","yaw_dumbbell","total_accel_dumbbell","gyros_dumbbell_x","gyros_dumbbell_y","gyros_dumbbell_z","accel_dumbbell_x","accel_dumbbell_y","accel_dumbbell_z","magnet_dumbbell_x","magnet_dumbbell_y","magnet_dumbbell_z","roll_forearm","pitch_forearm","yaw_forearm","total_accel_forearm","gyros_forearm_x","gyros_forearm_y","gyros_forearm_z","accel_forearm_x","accel_forearm_y","accel_forearm_z","magnet_forearm_x","magnet_forearm_y","magnet_forearm_z")]
+
+
+fit<-train(classe~.,data=trainingsub,method="gbm",verbose=FALSE)
+fit
+pred1<-predict(fit,newdata=trainingsub)
+confusionMatrix(trainingsub$classe,pred1)
+
+pred2<-predict(fit,newdata=testingsub)
+
+
+```
+
